@@ -3,10 +3,10 @@ package main
 import (
 	"context"
 	"log"
-	"net/http"
+	"net/http" // keep standard lib as is
 
 	"template-go/internal/config"
-	"template-go/internal/delivery/http"
+	delivery "template-go/internal/delivery/http"
 	"template-go/internal/otel"
 	"template-go/pkg/logger"
 )
@@ -24,9 +24,8 @@ func main() {
 	}
 	defer shutdown(ctx)
 
-	// Start HTTP server
 	log.Printf("🚀 Starting server on %s\n", cfg.ListenAddr)
-	err = http.ListenAndServe(cfg.ListenAddr, http.NewRouter())
+	err = http.ListenAndServe(cfg.ListenAddr, delivery.NewRouter())
 	if err != nil {
 		log.Fatalf("server error: %v", err)
 	}
