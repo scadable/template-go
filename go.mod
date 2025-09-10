@@ -3,6 +3,7 @@ module template-go
 go 1.24.4
 
 require (
+	github.com/go-chi/chi/v5 v5.2.3
 	go.opentelemetry.io/otel v1.38.0
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.38.0
 	go.opentelemetry.io/otel/sdk v1.38.0
