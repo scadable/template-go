@@ -11,6 +11,11 @@ func RootRoutes() http.Handler {
 	return r
 }
 
+// @Summary Hello World endpoint
+// @Tags Root
+// @Produce plain
+// @Success 200 {string} string "Hello, World!"
+// @Router / [get]
 func helloWorld(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/plain")
 	w.Write([]byte("Hello, World!"))

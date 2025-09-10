@@ -9,8 +9,15 @@ import (
 	delivery "template-go/internal/delivery/http"
 	"template-go/internal/otel"
 	"template-go/pkg/logger"
+
+	_ "template-go/docs"
 )
 
+// @title           Template Go API
+// @version         1.0
+// @description     Sample template-go service with Swagger
+// @host            localhost:8080
+// @BasePath        /
 func main() {
 	ctx := context.Background()
 	cfg := config.MustLoad()
