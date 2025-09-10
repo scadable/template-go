@@ -1,6 +1,6 @@
 # Makefile for template-go
 
-.PHONY: setup runserver test lint
+.PHONY: setup runserver test lint swagger
 
 # Set up the local dev environment
 setup:
@@ -18,3 +18,7 @@ test:
 # (Optional) Linting with golangci-lint
 lint:
 	golangci-lint run
+
+# Generate Swagger docs
+swagger:
+	swag init -g cmd/template-go/main.go -o ./docs
