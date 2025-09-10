@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"go.uber.org/zap"
 	"log"
 	"net/http" // keep standard lib as is
 
@@ -29,7 +30,12 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to init tracing: %v", err)
 	}
-	defer shutdown(ctx)
+
+	defer func() {
+		if err := shutdown(ctx); err != nil {
+			logger.Error(ctx, "failed to shutdown tracer", zap.Error(err))
+		}
+	}()
 
 	log.Printf("🚀 Starting server on %s\n", cfg.ListenAddr)
 	err = http.ListenAndServe(cfg.ListenAddr, delivery.NewRouter())

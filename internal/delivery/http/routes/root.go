@@ -2,7 +2,9 @@ package routes
 
 import (
 	"github.com/go-chi/chi/v5"
+	"go.uber.org/zap"
 	"net/http"
+	"template-go/pkg/logger"
 )
 
 func RootRoutes() http.Handler {
@@ -18,5 +20,9 @@ func RootRoutes() http.Handler {
 // @Router / [get]
 func helloWorld(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/plain")
-	w.Write([]byte("Hello, World!"))
+	_, err := w.Write([]byte("Hello, World!"))
+	if err != nil {
+		logger.Error(r.Context(), "failed to write response", zap.Error(err))
+	}
+
 }
