@@ -1,6 +1,11 @@
 # Makefile for template-go
 
-.PHONY: runserver test lint
+.PHONY: setup runserver test lint
+
+# Set up the local dev environment
+setup:
+	chmod +x ./bin/setup.sh
+	./bin/setup.sh
 
 # Run the Go application
 runserver:
