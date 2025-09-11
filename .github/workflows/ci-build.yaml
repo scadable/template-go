@@ -33,6 +33,9 @@ jobs:
         with:
           go-version: '1.22.x'
           cache: true
+          
+      - name: Download deps
+        run: go mod download
 
       - name: Golangci-lint
         uses: golangci/golangci-lint-action@v6.0.1
