@@ -16,11 +16,34 @@ import (
 	"template-go/internal/config"
 )
 
+// --- Local interfaces for improved testability ---
+type tracerProvider interface {
+	Shutdown(context.Context) error
+}
+
+// highlight-start
+type meterProvider interface {
+	Shutdown(context.Context) error
+}
+
+// highlight-end
+
+// --- Package-level constructors for testability ---
+var (
+	newResource       = resource.New
+	newTraceExporter  = otlptracegrpc.New
+	newPromExporter   = prometheus.New
+	newTracerProvider = func(opts ...sdktrace.TracerProviderOption) tracerProvider {
+		return sdktrace.NewTracerProvider(opts...)
+	}
+	newMeterProvider = func(opts ...metric.Option) meterProvider {
+		return metric.NewMeterProvider(opts...)
+	}
+)
+
 // InitOtel initializes OpenTelemetry for tracing and metrics.
-// It returns a shutdown function to gracefully close the providers.
 func InitOtel(ctx context.Context, cfg config.Config) (func(context.Context) error, error) {
-	// Create resource describing this service
-	res, err := resource.New(
+	res, err := newResource(
 		ctx,
 		resource.WithAttributes(
 			semconv.ServiceNameKey.String(cfg.OTELServiceName),
@@ -30,32 +53,39 @@ func InitOtel(ctx context.Context, cfg config.Config) (func(context.Context) err
 		return nil, fmt.Errorf("failed to create resource: %w", err)
 	}
 
-	// --- TRACER SETUP ---
-	traceExporter, err := otlptracegrpc.New(ctx)
+	traceExporter, err := newTraceExporter(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize OTLP trace exporter: %w", err)
 	}
 
-	tp := sdktrace.NewTracerProvider(
+	// The type of `tp` is now our local `tracerProvider` interface
+	tp := newTracerProvider(
 		sdktrace.WithBatcher(traceExporter),
 		sdktrace.WithResource(res),
 	)
-	otel.SetTracerProvider(tp)
+	// We need to cast back to the concrete type for the global setter
+	if realTP, ok := tp.(*sdktrace.TracerProvider); ok {
+		otel.SetTracerProvider(realTP)
+	}
 	otel.SetTextMapPropagator(propagation.TraceContext{})
 
-	// --- METRICS SETUP ---
-	metricExporter, err := prometheus.New()
+	metricExporter, err := newPromExporter()
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize Prometheus metric exporter: %w", err)
 	}
 
-	mp := metric.NewMeterProvider(
+	// highlight-start
+	// The type of `mp` is now our local `meterProvider` interface
+	mp := newMeterProvider(
 		metric.WithReader(metricExporter),
 		metric.WithResource(res),
 	)
-	otel.SetMeterProvider(mp)
+	// We need to cast back to the concrete type for the global setter
+	if realMP, ok := mp.(*metric.MeterProvider); ok {
+		otel.SetMeterProvider(realMP)
+	}
+	// highlight-end
 
-	// --- SHUTDOWN ---
 	shutdown := func(ctx context.Context) error {
 		ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 		defer cancel()
