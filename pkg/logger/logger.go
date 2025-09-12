@@ -9,11 +9,14 @@ import (
 
 var log *zap.Logger
 
+// newLogger is a function variable for creating a new zap.Logger.
+// It defaults to zap.NewProduction but can be overridden in tests.
+var newLogger = zap.NewProduction
+
 // Init initializes the global production logger.
 func Init() {
 	var err error
-	// zap.NewProduction() provides a sane, performant logger for production.
-	log, err = zap.NewProduction()
+	log, err = newLogger()
 	if err != nil {
 		panic("cannot initialize zap logger: " + err.Error())
 	}
