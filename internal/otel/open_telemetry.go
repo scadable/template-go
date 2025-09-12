@@ -21,12 +21,9 @@ type tracerProvider interface {
 	Shutdown(context.Context) error
 }
 
-// highlight-start
 type meterProvider interface {
 	Shutdown(context.Context) error
 }
-
-// highlight-end
 
 // --- Package-level constructors for testability ---
 var (
@@ -74,7 +71,6 @@ func InitOtel(ctx context.Context, cfg config.Config) (func(context.Context) err
 		return nil, fmt.Errorf("failed to initialize Prometheus metric exporter: %w", err)
 	}
 
-	// highlight-start
 	// The type of `mp` is now our local `meterProvider` interface
 	mp := newMeterProvider(
 		metric.WithReader(metricExporter),
@@ -84,7 +80,6 @@ func InitOtel(ctx context.Context, cfg config.Config) (func(context.Context) err
 	if realMP, ok := mp.(*metric.MeterProvider); ok {
 		otel.SetMeterProvider(realMP)
 	}
-	// highlight-end
 
 	shutdown := func(ctx context.Context) error {
 		ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
