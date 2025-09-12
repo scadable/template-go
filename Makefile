@@ -13,7 +13,7 @@ runserver:
 
 # Run tests
 test:
-	go test ./...
+	go test -cover ./...
 
 # (Optional) Linting with golangci-lint
 lint:

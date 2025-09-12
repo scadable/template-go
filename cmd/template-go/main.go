@@ -38,7 +38,7 @@ func main() {
 	}()
 
 	log.Printf("🚀 Starting server on %s\n", cfg.ListenAddr)
-	err = http.ListenAndServe(cfg.ListenAddr, delivery.NewRouter())
+	err = http.ListenAndServe(cfg.ListenAddr, delivery.NewRouter(cfg.OTELServiceName))
 	if err != nil {
 		log.Fatalf("server error: %v", err)
 	}
