@@ -27,6 +27,35 @@ else
 fi
 
 # -----------------------------------------------------------------------------
+# Install yq (https://github.com/mikefarah/yq) if not installed
+# -----------------------------------------------------------------------------
+if ! command -v yq &> /dev/null; then
+  echo "🔧 Installing yq..."
+  OS="$(uname -s)"
+  ARCH="$(uname -m)"
+
+  case "$OS" in
+    Darwin)
+      brew install yq || { echo "🍺 Homebrew not found. Please install yq manually."; exit 1; }
+      ;;
+    Linux)
+      YQ_BIN="yq_linux_amd64"
+      if [ "$ARCH" = "aarch64" ]; then
+        YQ_BIN="yq_linux_arm64"
+      fi
+      sudo wget -q "https://github.com/mikefarah/yq/releases/latest/download/${YQ_BIN}" -O /usr/local/bin/yq
+      sudo chmod +x /usr/local/bin/yq
+      ;;
+    *)
+      echo "❌ Unsupported OS: $OS. Please install yq manually from https://github.com/mikefarah/yq"
+      exit 1
+      ;;
+  esac
+else
+  echo "✅ yq already installed"
+fi
+
+# -----------------------------------------------------------------------------
 # Run go mod tidy to sync dependencies
 # -----------------------------------------------------------------------------
 echo "📦 Running go mod tidy..."
