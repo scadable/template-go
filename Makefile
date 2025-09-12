@@ -2,6 +2,8 @@
 
 .PHONY: setup runserver test lint swagger
 
+EXCLUDE_DIRS := $(shell yq '.exclude[]' tests/config.yaml | paste -sd '|' -)
+
 # Set up the local dev environment
 setup:
 	chmod +x ./bin/setup.sh
@@ -17,7 +19,7 @@ test:
 
 
 coverage:
-	go test -coverprofile=coverage.out ./...
+	go test -coverprofile=coverage.out $(shell go list ./... | grep -vE "($(EXCLUDE_DIRS))")
 	go tool cover -func=coverage.out
 	rm coverage.out
 	#go tool cover -html=coverage.out
