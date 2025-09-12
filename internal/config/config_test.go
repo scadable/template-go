@@ -9,9 +9,15 @@ import (
 
 func TestMustLoadDefaults(t *testing.T) {
 	// Ensure env vars are unset
-	os.Unsetenv("LISTEN_ADDR")
-	os.Unsetenv("OTEL_EXPORTER")
-	os.Unsetenv("OTEL_SERVICE_NAME")
+	if err := os.Unsetenv("LISTEN_ADDR"); err != nil {
+		t.Fatalf("failed to unset LISTEN_ADDR: %v", err)
+	}
+	if err := os.Unsetenv("OTEL_EXPORTER"); err != nil {
+		t.Fatalf("failed to unset OTEL_EXPORTER: %v", err)
+	}
+	if err := os.Unsetenv("OTEL_SERVICE_NAME"); err != nil {
+		t.Fatalf("failed to unset OTEL_SERVICE_NAME: %v", err)
+	}
 
 	cfg := MustLoad()
 
