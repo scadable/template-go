@@ -1,17 +1,25 @@
 package http
 
 import (
+	"net/http"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	httpSwagger "github.com/swaggo/http-swagger"
-	"net/http"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 
 	"template-go/internal/delivery/http/routes"
 )
 
-func NewRouter() http.Handler {
+func NewRouter(serviceName string) http.Handler {
 	r := chi.NewRouter()
+
+	// OTel Middleware
+	// This should be the first middleware
+	r.Use(func(next http.Handler) http.Handler {
+		return otelhttp.NewHandler(next, serviceName)
+	})
 
 	// Common middlewares
 	r.Use(middleware.RequestID)
