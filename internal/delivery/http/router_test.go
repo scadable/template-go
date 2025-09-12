@@ -17,7 +17,11 @@ func TestRouter_MetricsEndpoint(t *testing.T) {
 	router.ServeHTTP(rec, req)
 
 	resp := rec.Result()
-	defer resp.Body.Close()
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			t.Errorf("failed to close response body: %v", err)
+		}
+	}()
 
 	if resp.StatusCode != http.StatusOK {
 		t.Fatalf("expected 200 OK, got %d", resp.StatusCode)
@@ -38,7 +42,11 @@ func TestRouter_DocsRedirect(t *testing.T) {
 	router.ServeHTTP(rec, req)
 
 	resp := rec.Result()
-	defer resp.Body.Close()
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			t.Errorf("failed to close response body: %v", err)
+		}
+	}()
 
 	if resp.StatusCode != http.StatusMovedPermanently {
 		t.Fatalf("expected 301 redirect, got %d", resp.StatusCode)
@@ -59,7 +67,11 @@ func TestRouter_SwaggerHandler(t *testing.T) {
 	router.ServeHTTP(rec, req)
 
 	resp := rec.Result()
-	defer resp.Body.Close()
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			t.Errorf("failed to close response body: %v", err)
+		}
+	}()
 
 	// We don't expect 404 because httpSwagger.WrapHandler should be attached
 	if resp.StatusCode == http.StatusNotFound {
@@ -76,7 +88,11 @@ func TestRouter_RootRouteMounted(t *testing.T) {
 	router.ServeHTTP(rec, req)
 
 	resp := rec.Result()
-	defer resp.Body.Close()
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			t.Errorf("failed to close response body: %v", err)
+		}
+	}()
 
 	if resp.StatusCode == http.StatusOK {
 		return // good
