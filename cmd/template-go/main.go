@@ -4,7 +4,7 @@ import (
 	"context"
 	"go.uber.org/zap"
 	"log"
-	"net/http" // keep standard lib as is
+	"net/http"
 
 	"template-go/internal/config"
 	delivery "template-go/internal/delivery/http"
@@ -26,7 +26,7 @@ func main() {
 	logger.Init()
 	defer logger.Sync()
 
-	shutdown, err := otel.InitTracer(ctx, cfg)
+	shutdown, err := otel.InitOtel(ctx, cfg)
 	if err != nil {
 		log.Fatalf("failed to init tracing: %v", err)
 	}
@@ -38,7 +38,7 @@ func main() {
 	}()
 
 	log.Printf("🚀 Starting server on %s\n", cfg.ListenAddr)
-	err = http.ListenAndServe(cfg.ListenAddr, delivery.NewRouter())
+	err = http.ListenAndServe(cfg.ListenAddr, delivery.NewRouter(cfg.OTELServiceName))
 	if err != nil {
 		log.Fatalf("server error: %v", err)
 	}
