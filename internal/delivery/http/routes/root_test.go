@@ -18,7 +18,11 @@ func TestRootRoutes_HelloWorld(t *testing.T) {
 	router.ServeHTTP(rec, req)
 
 	resp := rec.Result()
-	defer resp.Body.Close()
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			t.Errorf("failed to close response body: %v", err)
+		}
+	}()
 
 	if resp.StatusCode != http.StatusOK {
 		t.Fatalf("expected status 200 OK, got %d", resp.StatusCode)
@@ -44,7 +48,11 @@ func TestRootRoutes_NotFound(t *testing.T) {
 	router.ServeHTTP(rec, req)
 
 	resp := rec.Result()
-	defer resp.Body.Close()
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			t.Errorf("failed to close response body: %v", err)
+		}
+	}()
 
 	if resp.StatusCode != http.StatusNotFound {
 		t.Fatalf("expected 404 for unknown route, got %d", resp.StatusCode)
