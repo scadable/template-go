@@ -19,10 +19,32 @@ jobs:
 
       - name: Download deps
         run: go mod download
+        
+      - name: Test with Coverage
+        run: |
+          # Read the list of directories to exclude from the config file
+          EXCLUDE_DIRS=$(yq '.exclude[]' tests/config.yaml | paste -sd '|' -)
+          echo "Excluding directories: $EXCLUDE_DIRS"
+          
+          # Run tests, excluding the specified directories
+          go test -v -coverprofile=coverage.out -covermode=atomic $(go list ./... | grep -vE "($EXCLUDE_DIRS)")
 
-      - name: Test
-        run: go test ./... -v
+      - name: Check 100% coverage
+        run: |
+          COVERAGE=$(go tool cover -func=coverage.out | grep total | awk '{print $3}' | cut -d'%' -f1)
+          echo "Current coverage: $COVERAGE%"
+          if [ "$COVERAGE" != "100.0" ]; then
+            echo "Coverage is not 100%! Failing the build."
+            exit 1
+          fi
 
+      - name: Upload coverage report
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./coverage.out
+          fail_ci_if_error: true
+          verbose: true
+  
   lint:
     runs-on: ubuntu-latest
     steps:
